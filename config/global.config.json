@@ -1,3 +1,34 @@
 {
-     "print_logs": true
+    "Info": "All time values are in ms (milliseconds). 1 minute is 60000ms",
+
+    "logs": {
+        "print_logs": true
+    },
+
+    "broadcast": {
+
+    },
+
+    "difficulty": {
+        "UPDATE_VAR_DIFF_PERIOD" : 30000
+    },
+
+    "enviroment": {
+        "mongoURL" : "mongodb://localhost:27017/tokenpool",
+        "mongodbName" : "pooldb",
+        "redisURL" : "0.0.0.0",
+        "redisPort": 6379
+    },
+
+    "pool": {
+        "SOLUTION_FINDING_BONUS" : 0
+    },
+
+    "payments": {
+        "PAYMENT_BROADCAST_PERIOD" : 1000,
+        "MIN_PAYMENTS_IN_BATCH": 1,
+        "MAX_TO_BATCH": 25,
+        "REBROADCAST_WAIT_BLOCKS": 5,
+        "BROADCAST_TIMEOUT": 600000
+    }
 }

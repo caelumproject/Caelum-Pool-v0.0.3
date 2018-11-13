@@ -1,3 +1,5 @@
+const config = require('../config/global.config.json');
+
 var redis = require("redis");
 var redisClient;
 
@@ -10,7 +12,7 @@ module.exports = {
     },
 
     async initRedisStorage() {
-        redisClient = redis.createClient(6379, '0.0.0.0');
+        redisClient = redis.createClient(config.enviroment.redisPort, config.enviroment.redisURL);
         redisClient.on("error", function(err) {
             console.log("Error " + err);
         });

@@ -12,15 +12,18 @@ var transactionCoordinator = require('./transactionModule')
 /**
 BUG : pool is resending transactions!
 DEV: Is it??
+CLM: No idea. Seems like it, let's fix this.
 **/
 
+/**
+ * IMPORTANT !! Make sure to override 'requestCurrentTokenMiningReward()'
+ * Caelum uses a structure different from the default EIP918's !!
+ */
 
-// We should seperate this. Necesarry? No. Usable? Yes.
-// This section should hande the token ONLY.
+// We should seperate this. necessary? No. Usable? Yes.
 module.exports = {
 
   async init(redisInterface, mongoInterface, web3, accountConfig, poolConfig, pool_env) {
-      clmHelper.printLog("tokenModule started")
       this.redisInterface = redisInterface;
       this.mongoInterface = mongoInterface;
       this.web3 = web3;
@@ -34,10 +37,11 @@ module.exports = {
         this.redisInterface.pushToRedisList("recent_challenges", ["-", "-", "-", "-", "-"]);
       }
 
+      clmHelper.printLog("tokenModule started")
     },
 
     async update() {
-      clmHelper.printLog("token update")
+
       var self = this;
 
       transactionCoordinator.init(
@@ -54,37 +58,31 @@ module.exports = {
       transactionCoordinator.update();
 
       setTimeout(function() {
-        self.transferMinimumTokensToPayoutWallet()
-      }, 1000)
-
-
-      setTimeout(function() {
         self.queueTokenTransfersForBalances()
-      }, 0)
+    }, 0) //transferMinimumTokensToPayoutWallet
 
 
+      clmHelper.printLog("token update event")
     },
 
     async getPoolChallengeNumber() {
         console.log("get pool challange")
-      return await this.redisInterface.loadRedisData('challengeNumber');
+        return await this.redisInterface.loadRedisData('challengeNumber');
     },
 
     async getPoolDifficultyTarget() {
-      var targetString = await this.redisInterface.loadRedisData('miningTarget');
-      return targetString
+        var targetString = await this.redisInterface.loadRedisData('miningTarget');
+        return targetString
     },
 
     async getPoolDifficulty() {
-      return await this.redisInterface.loadRedisData('miningDifficulty');
+        return await this.redisInterface.loadRedisData('miningDifficulty');
     },
 
     async getEthBlockNumber() {
-      var result = parseInt(await this.redisInterface.loadRedisData('ethBlockNumber'));
-
-      if (isNaN(result) || result < 1) result = 0;
-
-      return result
+        var result = parseInt(await this.redisInterface.loadRedisData('ethBlockNumber'));
+        if (isNaN(result) || result < 1) result = 0;
+        return result
     },
 
     getTokenContractAddress() {
@@ -98,7 +96,6 @@ module.exports = {
 
     },
 
-    //use address from ?
     async queueMiningSolution(solution_number, minerEthAddress, challenge_digest, challenge_number) {
       var currentTokenMiningReward = await this.requestCurrentTokenMiningReward()
 
@@ -113,7 +110,6 @@ module.exports = {
       await transactionCoordinator.addTransactionToQueue('solution', txData)
     },
 
-    //minerEthAddress
     async queueTokenTransfer(addressFromType, addressTo, tokenAmount, balancePaymentId) {
       var txData = {
         addressFromType: addressFromType, //payment or minting
@@ -121,16 +117,19 @@ module.exports = {
         tokenAmount: tokenAmount,
         balancePaymentId: balancePaymentId
       }
-     // await transactionCoordinator.addTransactionToQueue('transfer', txData)
+      await transactionCoordinator.addTransactionToQueue('transfer', txData)
     },
 
+    // CLM
+    // ToDo: Need to check this out. Manual transfer works, automated would be better.
     async transferMinimumTokensToPayoutWallet() {
+      console.log("CHECK OWN BALANCE")
       var minPayoutWalletBalance = this.poolConfig.payoutWalletMinimum; //this is in token-satoshis
 
       if (minPayoutWalletBalance == null) {
         minPayoutWalletBalance = 1000 * 100000000;
       }
-
+      console.log("NEED TO SEND TO BATCH CONTRACT 01")
       var payoutWalletAddress = this.getPaymentAccount().address;
       var mintingWalletAddress = this.getMintingAccount().address;
 
@@ -142,6 +141,7 @@ module.exports = {
 
       if (payoutWalletBalance < minPayoutWalletBalance && mintingWalletBalance >= minPayoutWalletBalance) {
         //queue a new transfer from the minting wallet to the payout wallet
+        console.log("NEED TO SEND TO BATCH CONTRACT")
         await this.queueTokenTransfer('minting', payoutWalletAddress, minPayoutWalletBalance, balancePaymentId)
       }
 
@@ -149,10 +149,12 @@ module.exports = {
       var self = this;
       setTimeout(function() {
           self.transferMinimumTokensToPayoutWallet()
-        }, 5 * 60 * 1000) //every five minutes
+      }, 1 * 60 * 1000) //every five minutes
 
     },
 
+    // If we would use the miner contract, this would fail.
+    // Why didn't we implemented a balanceOf in the mining contract that calls the token contract anyway?
     async getTokenBalanceOf(address) {
       var walletBalance = await this.tokenContract.methods.balanceOf(address).call();
       return walletBalance;

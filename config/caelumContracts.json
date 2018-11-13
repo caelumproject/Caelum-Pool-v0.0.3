@@ -16,8 +16,8 @@
       "testnet": {
               "contracts": {
                 "_contract_miner": {"name":"CaelumMiner", "blockchain_address":"0x9ac61e2ff4b1bdfbdd57fa617dd9f2108ced881e"},
-                "_contract_token": {"name":"CaelumToken", "blockchain_address":"0x9ac61e2ff4b1bdfbdd57fa617dd9f2108ced881e"},
-                "batchedpayments": {"name":"BatchedPayments", "blockchain_address":"0x6E2bF4318aab5b35d2CF8bcDe794dF0de380BE53"}
+                "_contract_token": {"name":"CaelumToken", "blockchain_address":"0x109db61402b59b7e49ae9d9c731932c832959ef0"},
+                "batchedpayments": {"name":"BatchedPayments", "blockchain_address":"0x40ed32c54868b43f582bf9acb4b93b48bff5c824"}
 
               }
             }

@@ -1,30 +1,25 @@
-
 var jayson = require('jayson');
 var web3utils = require('web3-utils');
 var peerUtils = require('./peerUtils')
 var clmHelper = require('./helperModule')
 
-const UPDATE_VAR_DIFF_PERIOD = 30 * 1000; //30 seconds
-const SOLUTION_FINDING_BONUS = 0;
-var varDiffPeriodCount = 0;
+const config = require('../config/global.config.json');
 
-/**
- * Flow
- * 1028 submitShare
- Store in redis
- solve with processQueuedShares
- handle with handleValidShare
- */
+// ToDo: Move this to global config.
+const UPDATE_VAR_DIFF_PERIOD = config.difficulty.UPDATE_VAR_DIFF_PERIOD;
+const SOLUTION_FINDING_BONUS = config.pool.SOLUTION_FINDING_BONUS;
+var varDiffPeriodCount = 0;
 
 module.exports = {
 
-    async init(web3, accountConfig, poolConfig, redisInterface, mongoInterface, tokenInterface) {
+    async init(web3, accountConfig, poolConfig, redisInterface, mongoInterface, tokenInterface, minerInterface) {
         this.web3 = web3;
         this.accountConfig = accountConfig;
         this.poolConfig = poolConfig;
         this.redisInterface = redisInterface;
         this.mongoInterface = mongoInterface;
         this.tokenInterface = tokenInterface;
+        this.minerInterface = minerInterface;
 
         clmHelper.printLog("peerModule ready")
     },

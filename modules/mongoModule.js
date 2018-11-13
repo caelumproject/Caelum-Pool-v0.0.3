@@ -1,6 +1,7 @@
+const config = require('../config/global.config.json');
 
 var mongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/tokenpool";
+var url = config.enviroment.mongoURL;
 var dbo;
 
 
@@ -11,7 +12,7 @@ module.exports =  {
     async init( dbName  )
     {
       var self = this;
-      if(dbName == null) {dbName = "pooldb"}
+      if(dbName == null) {dbName = config.enviroment.mongodbName}
 
       var database = await new Promise(function(resolve, reject) {
             mongoClient.connect(url, {useNewUrlParser: true} ,function(err, db) {

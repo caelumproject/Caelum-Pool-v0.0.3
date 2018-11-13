@@ -1,6 +1,8 @@
 var INFURA_ROPSTEN_URL = 'https://ropsten.infura.io/gmXEVo5luMPUGPqg6mhy';
 var INFURA_MAINNET_URL = 'https://mainnet.infura.io/gmXEVo5luMPUGPqg6mhy';
 
+var clmHelper = require('./modules/helperModule')
+
 const POOL_ENV = 'test';
 
 
@@ -51,13 +53,14 @@ switch (POOL_ENV) {
 init(web3);
 
 async function init(web3) {
-  console.log('Index.js init');
   await redisModule.init()
   await mongoModule.init()
   await tokenModule.init(redisModule, mongoModule, web3, accountConfig, poolConfig, POOL_ENV)
-  //await minerModule.init( web3, redisModule, mongoModule, poolConfig, POOL_ENV)
-  await peerModule.init(web3, accountConfig, poolConfig, redisModule, mongoModule, tokenModule)
+  await minerModule.init( web3, redisModule, mongoModule, poolConfig, POOL_ENV)
+  await peerModule.init(web3, accountConfig, poolConfig, redisModule, mongoModule, tokenModule, minerModule)
   peerModule.update();
   tokenModule.update();
   peerModule.listenForJSONRPC();
+
+  clmHelper.printLog("Index.js ready")
 }

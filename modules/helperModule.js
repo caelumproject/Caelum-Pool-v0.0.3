@@ -6,7 +6,7 @@ module.exports =  {
 
     printLog(_log)
     {
-        if (config.print_logs)
+        if (config.logs.print_logs)
 /*
         switch (_type) {
             case "WARN":
